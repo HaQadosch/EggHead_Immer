@@ -1,3 +1,5 @@
+import produce from 'immer'
+
 export interface IUser {
   id: number
   name: string
@@ -17,25 +19,14 @@ export interface IState {
 }
 
 export const addGift = (state: IState, { id, description, image }: Pick<IGift, 'id' | 'description' | 'image'>): IState => {
-  return {
-    ...state,
-    gifts: [
-      ...state.gifts,
-      { id, description, image, reservedBy: undefined }
-    ]
-  }
+  return produce(state, draft => {
+    draft.gifts.push({ id, description, image, reservedBy: undefined })
+  })
 }
 
 export const toggleReservation = (state: IState, giftID: IGift['id']): IState => {
-  return {
-    ...state,
-    gifts: state.gifts.map(gift => {
-      if (gift.id !== giftID) return gift
-
-      return {
-        ...gift,
-        reservedBy: gift.reservedBy === undefined ? state.currentUser.id : gift.reservedBy === state.currentUser.id ? undefined : gift.reservedBy
-      }
-    })
-  }
+  return produce(state, draft => {
+    const gift = draft.gifts.find(gift => gift.id === giftID)
+    gift.reservedBy = gift.reservedBy === undefined ? state.currentUser.id : gift.reservedBy === state.currentUser.id ? undefined : gift.reservedBy
+  })
 }
