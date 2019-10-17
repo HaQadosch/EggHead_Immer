@@ -26,7 +26,7 @@ export const addGift = (state: IState, { id, description, image }: Pick<IGift, '
 
 export const toggleReservation = (state: IState, giftID: IGift['id']): IState => {
   return produce(state, draft => {
-    const gift = draft.gifts.find(gift => gift.id === giftID)
+    const gift = draft.gifts.find(gift => gift.id === giftID) as IGift
     gift.reservedBy = gift.reservedBy === undefined ? state.currentUser.id : gift.reservedBy === state.currentUser.id ? undefined : gift.reservedBy
   })
 }
