@@ -1,4 +1,6 @@
 import produce from 'immer'
+import { allUsers, getCurrentUser } from './users'
+import defaultGifts from './assets/gifts.json'
 
 export interface IUser {
   id: number
@@ -30,3 +32,9 @@ export const toggleReservation = (state: IState, giftID: IGift['id']): IState =>
     gift.reservedBy = gift.reservedBy === undefined ? state.currentUser.id : gift.reservedBy === state.currentUser.id ? undefined : gift.reservedBy
   })
 }
+
+export const getInitialState = () => ({
+  users: allUsers,
+  currentUser: getCurrentUser(),
+  gifts: defaultGifts
+})

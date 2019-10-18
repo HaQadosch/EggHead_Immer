@@ -8,7 +8,7 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: 50vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,4 +19,67 @@
 
 .App-link {
   color: #09d3ac;
+}
+
+main {
+  background-color: #282c34;
+}
+
+
+.App > main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.App > main > h2 {
+  grid-column: span 2;
+  justify-self: start;
+  color: brown;
+}
+
+.App > main > ul {
+  list-style: none;
+  grid-column: span 3;
+  margin: 0;
+  padding: 0;
+}
+
+
+.App > main > ul > li > article {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  color: whitesmoke;
+}
+
+.App > main > ul > li > article.reserved {
+  color: lightcoral;
+}
+
+
+.App > main > ul > li > article h3 {
+  justify-self: start;
+  margin-top: 0px;
+}
+
+.App figure img {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border: 4px solid orange;
+  border-radius: 80px;
+}
+
+.App figure caption {
+  display: none;
+}
+
+.App figure {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-items: center;
+  margin: 15px 0px;
 }
