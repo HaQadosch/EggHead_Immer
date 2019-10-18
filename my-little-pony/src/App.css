@@ -25,18 +25,30 @@ main {
   background-color: #282c34;
 }
 
+.App section {
+  margin-top: 0px;
+}
 
 .App > main {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
+  grid-row-gap: 15px;
   padding-left: 15px;
 }
 
 .App > main > h2 {
-  grid-column: span 2;
+  grid-column: span 3;
   justify-self: start;
   color: brown;
+}
+
+.App main aside {
+  grid-column: span 3;
+  border-bottom: 3px dotted brown;
+  border-top: 3px dotted brown;
+  display: flex;
+  padding: 8px 0px 8px 3px;
 }
 
 .App > main > ul {

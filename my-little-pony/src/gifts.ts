@@ -20,7 +20,9 @@ export interface IState {
   gifts: IGift[]
 }
 
-export const addGift = (state: IState, { id, description, image }: Pick<IGift, 'id' | 'description' | 'image'>): IState => {
+export type NewGift = Pick<IGift, 'id' | 'description' | 'image'>
+
+export const addGift = (state: IState, { id, description, image }: NewGift): IState => {
   return produce(state, draft => {
     draft.gifts.push({ id, description, image, reservedBy: undefined })
   })
@@ -33,8 +35,8 @@ export const toggleReservation = (state: IState, giftID: IGift['id']): IState =>
   })
 }
 
-export const getInitialState = () => ({
+export const getInitialState = (): IState => ({
   users: allUsers,
-  currentUser: getCurrentUser(),
-  gifts: defaultGifts
+  currentUser: getCurrentUser() as IUser,
+  gifts: defaultGifts as IGift[]
 })

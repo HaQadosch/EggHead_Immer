@@ -5,9 +5,11 @@ interface IGiftProps {
   gift: IGift
   users: IUser[]
   currentUser: IUser
+  onReserve: (id: IGift['id']) => React.MouseEventHandler<HTMLButtonElement>
 }
 
-export const Gift: React.FC<IGiftProps> = ({ gift, users, currentUser }) => {
+export const Gift: React.FC<IGiftProps> = ({ gift, users, currentUser, onReserve }) => {
+
   return (
     <article className={ gift.reservedBy ? 'reserved' : '' }>
       <figure>
@@ -17,9 +19,9 @@ export const Gift: React.FC<IGiftProps> = ({ gift, users, currentUser }) => {
       <h3>{ gift.description }</h3>
       <section>
         { !gift.reservedBy
-          ? <button>Reserve</button>
+          ? <button onClick={ onReserve(gift.id) }>Reserve</button>
           : gift.reservedBy === currentUser.id
-            ? <button>Unreserve</button>
+            ? <button onClick={ onReserve(gift.id) }>Unreserve</button>
             : <p>Reserved by { users[gift.reservedBy].name }</p>
         }
       </section>
