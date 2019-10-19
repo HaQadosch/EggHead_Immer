@@ -1,30 +1,36 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import uuidv4 from 'uuid/v4'
+import { useImmer } from 'use-immer'
 
-import { getInitialState, IGift, addGiftCur, NewGift, IState, toggleReservationCur } from './gifts'
+import { getInitialState, IGift, IState } from './gifts'
 import { Gift } from './Gift'
 
-import uuidv4 from 'uuid/v4'
 
 const App: React.FC = () => {
-  const [{ users, gifts, currentUser }, setState] = useState<IState>(() => getInitialState())
+  const [{ users, gifts, currentUser }, updateState] = useImmer<IState>(() => getInitialState())
 
   const handleAdd: React.MouseEventHandler<HTMLButtonElement> = () => {
     const description = prompt('Gift to Add')
     if (description) {
-      const newGift: NewGift = {
-        description,
-        id: uuidv4(),
-        image: `https://picsum.photos/200?q=${ Math.random() }`,
-      }
-      setState(state => addGiftCur(state, newGift))
+      updateState(draft => {
+        draft.gifts.push({
+          description,
+          id: uuidv4(),
+          image: `https://picsum.photos/200?q=${ Math.random() }`,
+          reservedBy: undefined
+        })
+      })
     }
   }
 
   const handleReserve = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => {
-    setState(state => toggleReservationCur(state, id))
-  }, [])
+    updateState(draft => {
+      const gift = draft.gifts.find(gift => gift.id === id) as IGift
+      gift.reservedBy = gift.reservedBy === undefined ? draft.currentUser.id : gift.reservedBy === draft.currentUser.id ? undefined : gift.reservedBy
+    })
+  }, [updateState])
 
 
   return (
