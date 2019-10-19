@@ -1,6 +1,6 @@
-import { IUser, IGift, IState, addGift, toggleReservation } from '../gifts'
+import { IUser, IGift, IState, addGiftCur, toggleReservationCur } from '../gifts'
 
-const initialState: IState = {
+const createInitialState = (): IState => ({
   users: [
     { id: 1, name: 'User 1' },
     { id: 2, name: 'User 2' },
@@ -20,17 +20,18 @@ const initialState: IState = {
       reservedBy: undefined
     },
   ]
-}
+})
 
-describe('addGift', () => {
+describe('addGiftCur', () => {
   describe('should add an unreserved gift', () => {
+    const initialState = createInitialState()
     const mug: IGift = {
       id: 'mug',
       description: 'coffee mug',
       image: 'image of a mug',
       reservedBy: undefined
     }
-    const nextState = addGift(initialState, mug)
+    const nextState = addGiftCur(initialState, mug)
     test('should preserve the initial state', () => {
       expect(initialState.gifts).toHaveLength(2)
     });
@@ -40,10 +41,11 @@ describe('addGift', () => {
   });
 })
 
-describe('toggleReservation', () => {
+describe('toggleReservationCur', () => {
 
   describe('on an unreserved gift', () => {
-    const nextState = toggleReservation(initialState, 'egghead_subscription')
+    const initialState = createInitialState()
+    const nextState = toggleReservationCur(initialState, 'egghead_subscription')
     test('should preserved the initial state', () => {
       expect(initialState.gifts[1].reservedBy).toBe(undefined)
     });
@@ -57,10 +59,25 @@ describe('toggleReservation', () => {
       expect(nextState.gifts[1]).not.toBe(initialState.gifts[1])
       expect(nextState.gifts[0]).toBe(initialState.gifts[0])
     });
+
+    test('should not accidentally modify the produced state', () => {
+      expect(() => {
+        nextState.gifts[1].reservedBy = undefined
+      }).toThrow()
+    });
   });
 
-  test('on a reserved gift', () => {
-    const nextState = toggleReservation(initialState, 'immer_licence')
-    expect(nextState.gifts[0].reservedBy).toBe(2) // Id of the user who already reserved it.
+  describe('on a reserved gift', () => {
+    const initialState = createInitialState()
+    const nextState = toggleReservationCur(initialState, 'immer_licence')
+
+    test('should preserve stored reservedBy', () => {
+      expect(nextState.gifts[0].reservedBy).toBe(2) // Id of the user who already reserved it.
+    });
+
+    test('should not create new gift', () => {
+      expect(nextState.gifts[0]).toEqual(initialState.gifts[0])
+      expect(Object.is(nextState, initialState)).toBe(true) // referential identity.
+    });
   });
 });
