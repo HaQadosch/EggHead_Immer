@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { getInitialState, IGift, addGift, NewGift, IState, toggleReservation } from './gifts'
+import { getInitialState, IGift, addGiftCur, NewGift, IState, toggleReservationCur } from './gifts'
 import { Gift } from './Gift'
 
 import uuidv4 from 'uuid/v4'
@@ -18,12 +18,12 @@ const App: React.FC = () => {
         id: uuidv4(),
         image: `https://picsum.photos/200?q=${ Math.random() }`,
       }
-      setState(state => addGift(state, newGift))
+      setState(state => addGiftCur(state, newGift))
     }
   }
 
   const handleReserve = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => {
-    setState(state => toggleReservation(state, id))
+    setState(state => toggleReservationCur(state, id))
   }, [])
 
 
