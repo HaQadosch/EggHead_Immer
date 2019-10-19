@@ -1,30 +1,29 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { IGift, IUser } from './gifts'
 
 interface IGiftProps {
   gift: IGift
   users: IUser[]
   currentUser: IUser
-  onReserve: (id: IGift['id']) => React.MouseEventHandler<HTMLButtonElement>
+  onReserve: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => void
 }
 
-export const Gift: React.FC<IGiftProps> = ({ gift, users, currentUser, onReserve }) => {
-
+export const Gift = memo<IGiftProps>(function Gift ({ gift, users, currentUser, onReserve }) {
   return (
     <article className={ gift.reservedBy ? 'reserved' : '' }>
       <figure>
         <img src={ gift.image } alt={ gift.description } />
-        <caption>{ gift.description }</caption>
+        <figcaption>{ gift.description }</figcaption>
       </figure>
       <h3>{ gift.description }</h3>
       <section>
         { !gift.reservedBy
-          ? <button onClick={ onReserve(gift.id) }>Reserve</button>
+          ? <button onClick={ evt => onReserve(evt, gift.id) }>Reserve</button>
           : gift.reservedBy === currentUser.id
-            ? <button onClick={ onReserve(gift.id) }>Unreserve</button>
+            ? <button onClick={ evt => onReserve(evt, gift.id) }>Unreserve</button>
             : <p>Reserved by { users[gift.reservedBy].name }</p>
         }
       </section>
     </article>
   )
-}
+})

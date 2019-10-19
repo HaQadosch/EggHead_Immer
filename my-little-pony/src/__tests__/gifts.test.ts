@@ -47,8 +47,15 @@ describe('toggleReservation', () => {
     test('should preserved the initial state', () => {
       expect(initialState.gifts[1].reservedBy).toBe(undefined)
     });
+
     test('should set the current user an the reservedBy', () => {
       expect(nextState.gifts[1].reservedBy).toBe(1) // currentUser.id
+    });
+
+    test('should structurally share unchanged parts of the state tree', () => {
+      expect(nextState).not.toBe(initialState)
+      expect(nextState.gifts[1]).not.toBe(initialState.gifts[1])
+      expect(nextState.gifts[0]).toBe(initialState.gifts[0])
     });
   });
 

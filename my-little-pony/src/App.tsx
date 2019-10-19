@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
@@ -22,9 +22,9 @@ const App: React.FC = () => {
     }
   }
 
-  const handleReserve = (id: IGift['id']): React.MouseEventHandler<HTMLButtonElement> => () => {
+  const handleReserve = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => {
     setState(state => toggleReservation(state, id))
-  }
+  }, [])
 
 
   return (
@@ -52,7 +52,7 @@ const App: React.FC = () => {
             </aside>
             <ul>
               { gifts.map(gift => (
-                <li><Gift key={ gift.id } onReserve={ handleReserve } gift={ gift as IGift } users={ users } currentUser={ currentUser } /></li>
+                <li key={ gift.id }><Gift key={ gift.description } onReserve={ handleReserve } gift={ gift as IGift } users={ users } currentUser={ currentUser } /></li>
               )) }
             </ul>
           </>
