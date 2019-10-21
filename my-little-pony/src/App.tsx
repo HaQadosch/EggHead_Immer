@@ -8,7 +8,7 @@ import { getInitialState, IGift, IState, getBookDetails } from './gifts'
 import { Gift } from './Gift'
 
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
   const [{ users, gifts, currentUser }, updateState] = useImmer<IState>(() => getInitialState())
 
   const handleAdd: React.MouseEventHandler<HTMLButtonElement> = () => {
