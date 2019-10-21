@@ -4,7 +4,7 @@ import './App.css';
 import uuidv4 from 'uuid/v4'
 import { useImmer } from 'use-immer'
 
-import { getInitialState, IGift, IState } from './gifts'
+import { getInitialState, IGift, IState, getBookDetails } from './gifts'
 import { Gift } from './Gift'
 
 
@@ -38,6 +38,21 @@ const App: React.FC = () => {
     })
   }
 
+  const handleBook: React.MouseEventHandler<HTMLButtonElement> = async () => {
+    const isbn = prompt('Enter ISBN Number, like 0201558025')
+    if (isbn) {
+      const book: { identifiers: { isbn: string }, title: string, cover: { medium: string } } = await getBookDetails(isbn)
+      updateState(draft => {
+        draft.gifts.push({
+          id: book.identifiers.isbn,
+          description: book.title,
+          image: book.cover.medium,
+          reservedBy: undefined
+        })
+      })
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -49,6 +64,7 @@ const App: React.FC = () => {
             <h2>Hi, { currentUser.name } </h2>
             <aside>
               <button onClick={ handleAdd } >Add</button>
+              <button onClick={ handleBook } >Add Book</button>
               <button onClick={ handleReset } >Reset</button>
             </aside>
             <ul>

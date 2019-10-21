@@ -1,4 +1,4 @@
-import { IUser, IGift, IState, addGiftCur, toggleReservationCur } from '../gifts'
+import { IGift, IState, addBook, getBookDetails, addGiftCur, toggleReservationCur } from '../gifts'
 
 const createInitialState = (): IState => ({
   users: [
@@ -81,3 +81,18 @@ describe('toggleReservationCur', () => {
     });
   });
 });
+
+describe('addBook', () => {
+  it('should add math book', async () => {
+    const nextState = await addBook(createInitialState(), await getBookDetails('0201558025'))
+    expect(nextState.gifts[2].description).toBe('Concrete mathematics')
+  })
+
+  it('should add two books in parallel', async () => {
+    const promise1 = getBookDetails('0201558025')
+    const promise2 = getBookDetails('9781598560169')
+    const nextState = addBook(addBook(createInitialState(), await promise1), await promise2)
+
+    expect(nextState.gifts).toHaveLength(4)
+  });
+})
