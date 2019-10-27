@@ -1,54 +1,54 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useReducer } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
-import { useImmer } from 'use-immer'
+// import { useImmer } from 'use-immer'
 
-import { getInitialState, IGift, IState, getBookDetails } from './gifts'
+import { getInitialState, IGift, getBookDetails, giftReducer, IUser } from './gifts'
 import { Gift } from './Gift'
 
-
 export const App: React.FC = () => {
-  const [{ users, gifts, currentUser }, updateState] = useImmer<IState>(() => getInitialState())
+  // const [{ users, gifts, currentUser }, updateState] = useImmer<IState>(() => getInitialState())
+  const [{ users, gifts, currentUser }, dispatch] = useReducer(giftReducer, getInitialState())
 
   const handleAdd: React.MouseEventHandler<HTMLButtonElement> = () => {
     const description = prompt('Gift to Add')
     if (description) {
-      updateState(draft => {
-        draft.gifts.push({
+      dispatch({
+        type: "ADD_GIFT",
+        payload: {
           description,
           id: uuidv4(),
           image: `https://picsum.photos/200?q=${ Math.random() }`,
-          reservedBy: undefined
-        })
+        }
       })
     }
   }
 
   const handleReserve = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => {
-    updateState(draft => {
-      const gift = draft.gifts.find(gift => gift.id === id) as IGift
-      gift.reservedBy = gift.reservedBy === undefined ? draft.currentUser.id : gift.reservedBy === draft.currentUser.id ? undefined : gift.reservedBy
+    dispatch({
+      type: "TOGGLE_RESERVATION",
+      payload: { giftID: id }
     })
-  }, [updateState])
+  }, [dispatch])
 
   const handleReset: React.MouseEventHandler<HTMLButtonElement> = () => {
-    updateState(draft => {
-      return getInitialState()
+    dispatch({
+      type: "RESET"
     })
   }
 
   const handleBook: React.MouseEventHandler<HTMLButtonElement> = async () => {
     const isbn = prompt('Enter ISBN Number, like 0201558025')
     if (isbn) {
-      const book: { identifiers: { isbn: string }, title: string, cover: { medium: string } } = await getBookDetails(isbn)
-      updateState(draft => {
-        draft.gifts.push({
-          id: book.identifiers.isbn,
+      const book: { identifiers: { isbn_10: string[] }, title: string, cover: { medium: string } } = await getBookDetails(isbn)
+      dispatch({
+        type: "ADD_BOOK",
+        payload: {
+          id: book.identifiers.isbn_10[0],
           description: book.title,
           image: book.cover.medium,
-          reservedBy: undefined
-        })
+        }
       })
     }
   }
@@ -68,8 +68,8 @@ export const App: React.FC = () => {
               <button onClick={ handleReset } >Reset</button>
             </aside>
             <ul>
-              { gifts.map(gift => (
-                <li key={ gift.id }><Gift key={ gift.description } onReserve={ handleReserve } gift={ gift as IGift } users={ users } currentUser={ currentUser } /></li>
+              { (gifts as IGift[]).map((gift: IGift) => (
+                <li key={ gift.id }><Gift key={ gift.description } onReserve={ handleReserve } gift={ gift as IGift } users={ users as IUser[] } currentUser={ currentUser } /></li>
               )) }
             </ul>
           </>

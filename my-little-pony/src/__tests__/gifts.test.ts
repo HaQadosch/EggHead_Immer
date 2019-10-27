@@ -1,4 +1,4 @@
-import { IGift, IState, addBook, getBookDetails, addGiftCur, toggleReservationCur } from '../gifts'
+import { IGift, IState, addBook, getBookDetails, addGiftCur, giftReducer, toggleReservationCur, getInitialState } from '../gifts'
 
 const createInitialState = (): IState => ({
   users: [
@@ -22,7 +22,7 @@ const createInitialState = (): IState => ({
   ]
 })
 
-describe('addGiftCur', () => {
+describe('Adding a Gift', () => {
   describe('should add an unreserved gift', () => {
     const initialState = createInitialState()
     const mug: IGift = {
@@ -31,7 +31,10 @@ describe('addGiftCur', () => {
       image: 'image of a mug',
       reservedBy: undefined
     }
-    const nextState = addGiftCur(initialState, mug)
+    const nextState = giftReducer(initialState, {
+      type: "ADD_GIFT",
+      payload: mug
+    })
     test('should preserve the initial state', () => {
       expect(initialState.gifts).toHaveLength(2)
     });
@@ -41,11 +44,14 @@ describe('addGiftCur', () => {
   });
 })
 
-describe('toggleReservationCur', () => {
+describe('Toggle Reservation', () => {
 
   describe('on an unreserved gift', () => {
     const initialState = createInitialState()
-    const nextState = toggleReservationCur(initialState, 'egghead_subscription')
+    const nextState = giftReducer(initialState, {
+      type: "TOGGLE_RESERVATION",
+      payload: { giftID: 'egghead_subscription' }
+    })
     test('should preserved the initial state', () => {
       expect(initialState.gifts[1].reservedBy).toBe(undefined)
     });
@@ -69,7 +75,10 @@ describe('toggleReservationCur', () => {
 
   describe('on a reserved gift', () => {
     const initialState = createInitialState()
-    const nextState = toggleReservationCur(initialState, 'immer_licence')
+    const nextState = giftReducer(initialState, {
+      type: "TOGGLE_RESERVATION",
+      payload: { giftID: 'immer_licence' }
+    })
 
     test('should preserve stored reservedBy', () => {
       expect(nextState.gifts[0].reservedBy).toBe(2) // Id of the user who already reserved it.
@@ -82,16 +91,48 @@ describe('toggleReservationCur', () => {
   });
 });
 
-describe('addBook', () => {
+describe('Add book', () => {
   it('should add math book', async () => {
-    const nextState = await addBook(createInitialState(), await getBookDetails('0201558025'))
+    const book: { identifiers: { isbn_10: string[] }, title: string, cover: { medium: string } } = await getBookDetails('0201558025')
+    const nextState = giftReducer(createInitialState(), {
+      type: "ADD_BOOK",
+      payload: {
+        id: book.identifiers.isbn_10[0],
+        description: book.title,
+        image: book.cover.medium,
+      }
+    })
     expect(nextState.gifts[2].description).toBe('Concrete mathematics')
   })
 
   it('should add two books in parallel', async () => {
     const promise1 = getBookDetails('0201558025')
     const promise2 = getBookDetails('9781598560169')
-    const nextState = addBook(addBook(createInitialState(), await promise1), await promise2)
+    const actionBook1 = {
+      type: "ADD_BOOK",
+      payload: await (async () => {
+        const book = await promise1
+        return {
+          id: book.identifiers.isbn_10[0],
+          description: book.title,
+          image: book.cover.medium,
+        }
+      })()
+    }
+
+    const actionBook2 = {
+      type: "ADD_BOOK",
+      payload: await (async () => {
+        const book = await promise2
+        return {
+          id: book.identifiers.isbn_10[0],
+          description: book.title,
+          image: book.cover.medium,
+        }
+      })()
+    }
+
+    const nextState = [actionBook1, actionBook2].reduce(giftReducer, createInitialState())
 
     expect(nextState.gifts).toHaveLength(4)
   });

@@ -22,6 +22,42 @@ export interface IState {
 
 export type NewGift = Pick<IGift, 'id' | 'description' | 'image'>
 
+export const giftReducer = produce((draft: Draft<IState>, action) => {
+  switch (action.type) {
+    case "ADD_BOOK": {
+      const { id, description, image } = action.payload
+      if (!(id && description && image)) return
+      draft.gifts.push({
+        id,
+        description,
+        image,
+        reservedBy: undefined
+      })
+    }
+      break
+    case "TOGGLE_RESERVATION": {
+      const { giftID } = action.payload
+      if (!giftID) return
+      const gift = draft.gifts.find(gift => gift.id === giftID) as IGift
+      gift.reservedBy = gift.reservedBy === undefined ? draft.currentUser.id : gift.reservedBy === draft.currentUser.id ? undefined : gift.reservedBy
+    }
+      break
+    case "ADD_GIFT": {
+      const { id, description, image } = action.payload
+      if (!(id && description && image)) return
+      draft.gifts.push({
+        id,
+        description,
+        image,
+        reservedBy: undefined
+      })
+    }
+      break
+    case "RESET":
+      return getInitialState()
+  }
+})
+
 export const addGift = (state: IState, { id, description, image }: NewGift): IState => {
   return produce(state, draft => {
     draft.gifts.push({ id, description, image, reservedBy: undefined })
