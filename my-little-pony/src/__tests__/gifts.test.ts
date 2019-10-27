@@ -1,4 +1,4 @@
-import { IGift, IState, getBookDetails, giftReducer } from '../gifts'
+import { IGift, IState, getBookDetails, giftReducer, patchGeneratingGiftReducer } from '../gifts'
 
 const createInitialState = (): IState => ({
   users: [
@@ -135,5 +135,36 @@ describe('Add book', () => {
     const nextState = [actionBook1, actionBook2].reduce(giftReducer, createInitialState())
 
     expect(nextState.gifts).toHaveLength(4)
+  });
+})
+
+describe('Patches', () => {
+  describe('Reserving unreserved gift', () => {
+    const initialState = createInitialState()
+    const [nextState, patches, invPatches] = patchGeneratingGiftReducer(initialState, {
+      type: "TOGGLE_RESERVATION",
+      payload: { giftID: 'egghead_subscription' }
+    })
+    test('should correctly assign ReservedBy', () => {
+      expect(nextState.gifts[1].reservedBy).toBe(1) // currentUser.id
+    });
+    test('should generate the correct patch', () => {
+      expect(patches).toEqual([
+        {
+          op: 'replace',
+          path: ['gifts', 1, 'reservedBy'],
+          value: 1
+        }
+      ])
+    });
+    test('should generate the correct inversePatch', () => {
+      expect(invPatches).toEqual([
+        {
+          op: 'replace',
+          path: ['gifts', 1, 'reservedBy'],
+          value: undefined
+        }
+      ])
+    });
   });
 })

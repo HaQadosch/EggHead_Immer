@@ -1,4 +1,4 @@
-import produce, { Draft } from 'immer'
+import produce, { Draft, produceWithPatches } from 'immer'
 import { allUsers, getCurrentUser } from './users'
 import defaultGifts from './assets/gifts.json'
 
@@ -20,7 +20,7 @@ export interface IState {
   gifts: IGift[]
 }
 
-export const giftReducer = produce((draft: Draft<IState>, action) => {
+const giftsRecipe = (draft: Draft<IState>, action: { type: string, payload?: any }) => {
   switch (action.type) {
     case "ADD_BOOK": {
       const { id, description, image } = action.payload
@@ -54,7 +54,13 @@ export const giftReducer = produce((draft: Draft<IState>, action) => {
     case "RESET":
       return getInitialState()
   }
-})
+}
+
+// curState, action => newState
+export const giftReducer = produce(giftsRecipe)
+
+// curState, action => [newState, patches, inversePatches]
+export const patchGeneratingGiftReducer = produceWithPatches(giftsRecipe)
 
 export const getInitialState = (): IState => ({
   users: allUsers,

@@ -1,13 +1,28 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
 
-import { getInitialState, IGift, getBookDetails, giftReducer, IUser } from './gifts'
+import { getInitialState, IGift, getBookDetails, IUser, patchGeneratingGiftReducer } from './gifts'
 import { Gift } from './Gift'
+import { useSocket } from './useSocket';
+import { Patch } from 'immer';
 
 export const App: React.FC = () => {
-  const [{ users, gifts, currentUser }, dispatch] = useReducer(giftReducer, getInitialState())
+  const [{ users, gifts, currentUser }, setState] = useState(() => getInitialState())
+  
+  const send = useSocket('ws://localhost:5001', (patches: Patch[]) => {
+    console.log('We received an owl!', { patches })
+  })
+
+  const dispatch = useCallback(action => {
+    setState(currentState => {
+      const [nextState, patches, invPatches] = patchGeneratingGiftReducer(currentState, action)
+      console.log({ patches, invPatches })
+      send(patches)
+      return nextState
+    })
+  }, [send])
 
   const handleAdd: React.MouseEventHandler<HTMLButtonElement> = () => {
     const description = prompt('Gift to Add')
@@ -22,6 +37,8 @@ export const App: React.FC = () => {
       })
     }
   }
+
+
 
   const handleReserve = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: IGift['id']) => {
     dispatch({
