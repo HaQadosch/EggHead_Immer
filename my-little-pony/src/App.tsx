@@ -3,16 +3,20 @@ import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
 
-import { getInitialState, IGift, getBookDetails, IUser, patchGeneratingGiftReducer } from './gifts'
+import { getInitialState, IGift, getBookDetails, IUser, patchGeneratingGiftReducer, giftReducer } from './gifts'
 import { Gift } from './Gift'
 import { useSocket } from './useSocket';
 import { Patch } from 'immer';
 
 export const App: React.FC = () => {
   const [{ users, gifts, currentUser }, setState] = useState(() => getInitialState())
-  
+
   const send = useSocket('ws://localhost:5001', (patches: Patch[]) => {
     console.log('We received an owl!', { patches })
+    setState(state => giftReducer(state, {
+      type: "APPLY_PATCHES",
+      payload: { patches }
+    }))
   })
 
   const dispatch = useCallback(action => {

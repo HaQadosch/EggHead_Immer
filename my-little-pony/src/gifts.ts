@@ -1,4 +1,4 @@
-import produce, { Draft, produceWithPatches } from 'immer'
+import produce, { Draft, produceWithPatches, applyPatches } from 'immer'
 import { allUsers, getCurrentUser } from './users'
 import defaultGifts from './assets/gifts.json'
 
@@ -53,6 +53,10 @@ const giftsRecipe = (draft: Draft<IState>, action: { type: string, payload?: any
       break
     case "RESET":
       return getInitialState()
+    case "APPLY_PATCHES": {
+      console.log('applying patches', { patches: action.payload.patches })
+      applyPatches(draft, action.payload.patches)
+    }
   }
 }
 
@@ -69,7 +73,9 @@ export const getInitialState = (): IState => ({
 })
 
 export const getBookDetails = async (isbn: string) => {
-  const response = await fetch(`http://openlibrary.org/api/books?bibkeys=ISBN:${ isbn }&jscmd=data&format=json`)
+  const response = await fetch(`http://openlibrary.org/api/books?bibkeys=ISBN:${ isbn }&jscmd=data&format=json`, {
+    mode: 'cors'
+  })
   const book = (await response.json())[`ISBN:${ isbn }`]
   return book
 }

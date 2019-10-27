@@ -2,6 +2,15 @@ import { useRef, useEffect, useCallback } from "react";
 import { Patch } from 'immer'
 import { IncomingMessage } from "http";
 
+/**
+ *   const send = useSocket('ws://localhost:5001', (patches: Patch[]) => {
+    console.log('We received an owl!', { patches })
+    setState(state => giftReducer(state, {
+      type: "APPLY_PATCHES",
+      payload: { patches }
+    }))
+  })
+ */
 export function useSocket (url: string, onMessage: any) {
   const socket = useRef<WebSocket>()
   const msgHandler = useRef<any>()

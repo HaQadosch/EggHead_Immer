@@ -1,4 +1,5 @@
 import { IGift, IState, getBookDetails, giftReducer, patchGeneratingGiftReducer } from '../gifts'
+import { applyPatches } from 'immer';
 
 const createInitialState = (): IState => ({
   users: [
@@ -165,6 +166,16 @@ describe('Patches', () => {
           value: undefined
         }
       ])
+    });
+    test('should produce the same state when replaying patches - 1', () => {
+      expect(applyPatches(initialState, patches)).toEqual(nextState)
+    });
+
+    test('should produce the same state when replaying patches - 2', () => {
+      expect(giftReducer(initialState, {
+        type: "APPLY_PATCHES",
+        payload: { patches }
+      })).toEqual(nextState)
     });
   });
 })
