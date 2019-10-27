@@ -1,4 +1,4 @@
-import { IGift, IState, addBook, getBookDetails, addGiftCur, giftReducer, toggleReservationCur, getInitialState } from '../gifts'
+import { IGift, IState, getBookDetails, giftReducer } from '../gifts'
 
 const createInitialState = (): IState => ({
   users: [

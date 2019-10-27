@@ -2,13 +2,11 @@ import React, { useCallback, useReducer } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
-// import { useImmer } from 'use-immer'
 
 import { getInitialState, IGift, getBookDetails, giftReducer, IUser } from './gifts'
 import { Gift } from './Gift'
 
 export const App: React.FC = () => {
-  // const [{ users, gifts, currentUser }, updateState] = useImmer<IState>(() => getInitialState())
   const [{ users, gifts, currentUser }, dispatch] = useReducer(giftReducer, getInitialState())
 
   const handleAdd: React.MouseEventHandler<HTMLButtonElement> = () => {
