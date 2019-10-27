@@ -7,8 +7,8 @@ var connections = [];
 var history = [];
 wss.on('connection', function (ws) {
     connections.push(ws);
-    console.log('New Disturbance in the Force!', { ws: ws });
-    wss.on('message', function (message) {
+    console.log('New Disturbance in the Force!');
+    ws.on('message', function (message) {
         console.log('Yo', { message: message });
         // Append it to the rest of the patches
         history.push.apply(history, JSON.parse(message));
@@ -19,7 +19,7 @@ wss.on('connection', function (ws) {
             client.send(message);
         });
     });
-    wss.on('close', function () {
+    ws.on('close', function () {
         var idx = connections.indexOf(ws);
         if (idx !== -1) {
             connections.splice(idx, 1);

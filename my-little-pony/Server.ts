@@ -8,11 +8,11 @@ const connections: WebSocket[] = []
 
 let history: IncomingMessage[] = []
 
-wss.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: any) => {
   connections.push(ws)
-  console.log('New Disturbance in the Force!', { ws })
+  console.log('New Disturbance in the Force!')
 
-  wss.on('message', message => {
+  ws.on('message', (message: string) => {
     console.log('Yo', { message })
 
     // Append it to the rest of the patches
@@ -27,7 +27,7 @@ wss.on('connection', (ws: WebSocket) => {
 
   })
 
-  wss.on('close', () => {
+  ws.on('close', () => {
     const idx = connections.indexOf(ws)
     if (idx !== -1) {
       connections.splice(idx, 1)
