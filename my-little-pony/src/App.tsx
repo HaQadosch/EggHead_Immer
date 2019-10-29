@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
 
-import { getInitialState, IGift, getBookDetails, IUser, patchGeneratingGiftReducer, giftReducer } from './gifts'
+import { getInitialState, IGift, IGifts, getBookDetails, IUser, patchGeneratingGiftReducer, giftReducer } from './gifts'
 import { Gift } from './Gift'
 import { useSocket } from './useSocket';
 import { Patch } from 'immer';
@@ -87,7 +87,7 @@ export const App: React.FC = () => {
               <button onClick={ handleReset } >Reset</button>
             </aside>
             <ul>
-              { (gifts as IGift[]).map((gift: IGift) => (
+              { Object.values(gifts as IGifts).map((gift: IGift) => (
                 <li key={ gift.id }><Gift key={ gift.description } onReserve={ handleReserve } gift={ gift as IGift } users={ users as IUser[] } currentUser={ currentUser } /></li>
               )) }
             </ul>

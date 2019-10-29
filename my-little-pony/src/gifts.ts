@@ -11,13 +11,17 @@ export interface IGift {
   id: string
   description: string
   image: string
-  reservedBy: IUser['id'] | undefined
+  reservedBy?: IUser['id'] | undefined
+}
+
+export interface IGifts {
+  [id: string]: IGift
 }
 
 export interface IState {
   users: IUser[],
   currentUser: IUser,
-  gifts: IGift[]
+  gifts: IGifts
 }
 
 const giftsRecipe = (draft: Draft<IState>, action: { type: string, payload?: any }) => {
@@ -25,30 +29,30 @@ const giftsRecipe = (draft: Draft<IState>, action: { type: string, payload?: any
     case "ADD_BOOK": {
       const { id, description, image } = action.payload
       if (!(id && description && image)) return
-      draft.gifts.push({
+      draft.gifts[id] = {
         id,
         description,
         image,
         reservedBy: undefined
-      })
+      }
     }
       break
     case "TOGGLE_RESERVATION": {
       const { giftID } = action.payload
       if (!giftID) return
-      const gift = draft.gifts.find(gift => gift.id === giftID) as IGift
+      const gift = draft.gifts[giftID]
       gift.reservedBy = gift.reservedBy === undefined ? draft.currentUser.id : gift.reservedBy === draft.currentUser.id ? undefined : gift.reservedBy
     }
       break
     case "ADD_GIFT": {
       const { id, description, image } = action.payload
       if (!(id && description && image)) return
-      draft.gifts.push({
+      draft.gifts[id] = {
         id,
         description,
         image,
         reservedBy: undefined
-      })
+      }
     }
       break
     case "RESET":
@@ -69,7 +73,7 @@ export const patchGeneratingGiftReducer = produceWithPatches(giftsRecipe)
 export const getInitialState = (): IState => ({
   users: allUsers,
   currentUser: getCurrentUser() as IUser,
-  gifts: defaultGifts as IGift[]
+  gifts: defaultGifts as IGifts
 })
 
 export const getBookDetails = async (isbn: string) => {
