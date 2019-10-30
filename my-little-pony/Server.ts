@@ -1,12 +1,17 @@
 import { Server as WebSocketServer } from 'ws'
-import { IncomingMessage } from 'http'
+import { IGifts } from './src/gifts'
+
+import gifts from './src/assets/gifts.json'
+import { produceWithPatches, applyPatches, Draft, Patch } from 'immer'
+
+const initialState: { gifts: IGifts } = { gifts }
 
 const wss = new WebSocketServer({ port: 5001 })
 console.log('WebSocket server on port 5001')
 
 const connections: WebSocket[] = []
 
-let history: IncomingMessage[] = []
+let history: Patch[] = []
 
 wss.on('connection', (ws: any) => {
   connections.push(ws)
@@ -37,3 +42,15 @@ wss.on('connection', (ws: any) => {
   // Sends all the patches we received so far.
   ws.send(JSON.stringify(history))
 })
+
+function compressHistory (currentPatches: Patch[]) {
+  const [, patches] = produceWithPatches(initialState, (draft: Draft<{ gifts: IGifts }>): { gifts: IGifts } => {
+    return applyPatches(draft, currentPatches)
+  })
+  console.log(`compressed from ${ currentPatches.length } to ${ patches.length } patches.`)
+  return patches
+}
+
+setInterval(() => {
+  history = compressHistory(history)
+}, 5000)
