@@ -7,20 +7,20 @@ const createInitialState = (): IState => ({
     { id: 2, name: 'User 2' },
   ],
   currentUser: { id: 1, name: 'User 1' },
-  gifts: [
-    {
+  gifts: {
+    'immer_licence': {
       id: 'immer_licence',
       description: 'Immer Licence',
       image: 'https://raw.githubusercontent.com/immerjs/immer/master/images/immer-logo.png',
       reservedBy: 2
     },
-    {
+    'egghead_subscription': {
       id: 'egghead_subscription',
       description: 'Egghead.io subscription',
       image: 'https://pbs.twimg.com/profile_images/735242324293210112/H8YfgQHP_400x400.jpg',
       reservedBy: undefined
-    },
-  ]
+    }
+  }
 })
 
 describe('Adding a Gift', () => {
@@ -37,10 +37,10 @@ describe('Adding a Gift', () => {
       payload: mug
     })
     test('should preserve the initial state', () => {
-      expect(initialState.gifts).toHaveLength(2)
+      expect(Object.keys(initialState.gifts)).toHaveLength(2)
     });
     test('should add to the new state', () => {
-      expect(nextState.gifts).toHaveLength(3)
+      expect(Object.keys(nextState.gifts)).toHaveLength(3)
     });
   });
 })
@@ -54,22 +54,22 @@ describe('Toggle Reservation', () => {
       payload: { giftID: 'egghead_subscription' }
     })
     test('should preserved the initial state', () => {
-      expect(initialState.gifts[1].reservedBy).toBe(undefined)
+      expect(initialState.gifts['egghead_subscription'].reservedBy).toBe(undefined)
     });
 
     test('should set the current user an the reservedBy', () => {
-      expect(nextState.gifts[1].reservedBy).toBe(1) // currentUser.id
+      expect(nextState.gifts['egghead_subscription'].reservedBy).toBe(1) // currentUser.id
     });
 
     test('should structurally share unchanged parts of the state tree', () => {
       expect(nextState).not.toBe(initialState)
-      expect(nextState.gifts[1]).not.toBe(initialState.gifts[1])
-      expect(nextState.gifts[0]).toBe(initialState.gifts[0])
+      expect(nextState.gifts['egghead_subscription']).not.toBe(initialState.gifts['egghead_subscription'])
+      expect(nextState.gifts['immer_licence']).toBe(initialState.gifts['immer_licence'])
     });
 
     test('should not accidentally modify the produced state', () => {
       expect(() => {
-        nextState.gifts[1].reservedBy = undefined
+        nextState.gifts['egghead_subscription'].reservedBy = undefined
       }).toThrow()
     });
   });
@@ -82,11 +82,11 @@ describe('Toggle Reservation', () => {
     })
 
     test('should preserve stored reservedBy', () => {
-      expect(nextState.gifts[0].reservedBy).toBe(2) // Id of the user who already reserved it.
+      expect(nextState.gifts['immer_licence'].reservedBy).toBe(2) // Id of the user who already reserved it.
     });
 
     test('should not create new gift', () => {
-      expect(nextState.gifts[0]).toEqual(initialState.gifts[0])
+      expect(nextState.gifts['immer_licence']).toEqual(initialState.gifts['immer_licence'])
       expect(Object.is(nextState, initialState)).toBe(true) // referential identity.
     });
   });
@@ -103,7 +103,7 @@ describe('Add book', () => {
         image: book.cover.medium,
       }
     })
-    expect(nextState.gifts[2].description).toBe('Concrete mathematics')
+    expect(nextState.gifts[book.identifiers.isbn_10[0]].description).toBe('Concrete mathematics')
   })
 
   it('should add two books in parallel', async () => {
@@ -135,7 +135,7 @@ describe('Add book', () => {
 
     const nextState = [actionBook1, actionBook2].reduce(giftReducer, createInitialState())
 
-    expect(nextState.gifts).toHaveLength(4)
+    expect(Object.keys(nextState.gifts)).toHaveLength(4)
   });
 })
 
@@ -147,13 +147,13 @@ describe('Patches', () => {
       payload: { giftID: 'egghead_subscription' }
     })
     test('should correctly assign ReservedBy', () => {
-      expect(nextState.gifts[1].reservedBy).toBe(1) // currentUser.id
+      expect(nextState.gifts['egghead_subscription'].reservedBy).toBe(1) // currentUser.id
     });
     test('should generate the correct patch', () => {
       expect(patches).toEqual([
         {
           op: 'replace',
-          path: ['gifts', 1, 'reservedBy'],
+          path: ['gifts', 'egghead_subscription', 'reservedBy'],
           value: 1
         }
       ])
@@ -162,7 +162,7 @@ describe('Patches', () => {
       expect(invPatches).toEqual([
         {
           op: 'replace',
-          path: ['gifts', 1, 'reservedBy'],
+          path: ['gifts', 'egghead_subscription', 'reservedBy'],
           value: undefined
         }
       ])
@@ -176,6 +176,10 @@ describe('Patches', () => {
         type: "APPLY_PATCHES",
         payload: { patches }
       })).toEqual(nextState)
+    });
+
+    test('should produce the original state when playing the inverse patches', () => {
+      expect(applyPatches(nextState, invPatches)).toEqual(initialState)
     });
   });
 })

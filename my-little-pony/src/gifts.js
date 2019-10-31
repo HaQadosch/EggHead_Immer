@@ -89,7 +89,6 @@ var giftsRecipe = function (draft, action) {
         case "RESET":
             return exports.getInitialState();
         case "APPLY_PATCHES": {
-            console.log('applying patches', { patches: action.payload.patches });
             immer_1.applyPatches(draft, action.payload.patches);
         }
     }

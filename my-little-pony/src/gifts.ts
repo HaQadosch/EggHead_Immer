@@ -58,7 +58,6 @@ const giftsRecipe = (draft: Draft<IState>, action: { type: string, payload?: any
     case "RESET":
       return getInitialState()
     case "APPLY_PATCHES": {
-      console.log('applying patches', { patches: action.payload.patches })
       applyPatches(draft, action.payload.patches)
     }
   }
