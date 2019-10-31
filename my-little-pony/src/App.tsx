@@ -10,7 +10,8 @@ import { Patch } from 'immer';
 
 export const App: React.FC = () => {
   const [{ users, gifts, currentUser }, setState] = useState(() => getInitialState())
-  const undoStack = useRef<Patch[][]>([])
+  const undoStack = useRef<{ patches: Patch[]; invPatches: Patch[]; }[]>([])
+  const undoStackPointer = useRef<number>(-1)
 
   const send = useSocket('ws://localhost:5001', (patches: Patch[]) => {
     console.log('We received an owl!', { patches })
@@ -25,7 +26,9 @@ export const App: React.FC = () => {
       const [nextState, patches, invPatches] = patchGeneratingGiftReducer(currentState, action)
       send(patches)
       if (undoable) {
-        undoStack.current.push(invPatches)
+        const pointer = ++undoStackPointer.current
+        undoStack.current.length = pointer
+        undoStack.current[pointer] = { patches, invPatches }
       }
       return nextState
     })
@@ -76,9 +79,18 @@ export const App: React.FC = () => {
   }
 
   const handleUndo = () => {
-    if (!undoStack.current.length) return
+    if (undoStackPointer.current < 0) return
 
-    const patches = undoStack.current.pop()
+    const patches = undoStack.current[undoStackPointer.current].invPatches
+    undoStackPointer.current--
+    dispatch({ type: "APPLY_PATCHES", payload: { patches } }, false)
+  }
+
+  const handleRedo = () => {
+    if (undoStackPointer.current >= undoStack.current.length) return
+
+    undoStackPointer.current++
+    const patches = undoStack.current[undoStackPointer.current].patches
     dispatch({ type: "APPLY_PATCHES", payload: { patches } }, false)
   }
 
@@ -95,7 +107,8 @@ export const App: React.FC = () => {
               <button onClick={ handleAdd } >Add</button>
               <button onClick={ handleBook } >Add Book</button>
               <button onClick={ handleReset } >Reset</button>
-              <button onClick={ handleUndo } disabled={ !undoStack.current.length } >Undo</button>
+              <button onClick={ handleUndo } disabled={ undoStackPointer.current < 0 } >Undo</button>
+              <button onClick={ handleRedo } disabled={ undoStackPointer.current >= undoStack.current.length } >Redo</button>
             </aside>
             <ul>
               { Object.values(gifts as IGifts).map((gift: IGift) => (
