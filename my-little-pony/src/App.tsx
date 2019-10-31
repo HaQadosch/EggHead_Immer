@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import uuidv4 from 'uuid/v4'
@@ -10,6 +10,7 @@ import { Patch } from 'immer';
 
 export const App: React.FC = () => {
   const [{ users, gifts, currentUser }, setState] = useState(() => getInitialState())
+  const undoStack = useRef<Patch[][]>([])
 
   const send = useSocket('ws://localhost:5001', (patches: Patch[]) => {
     console.log('We received an owl!', { patches })
@@ -19,11 +20,13 @@ export const App: React.FC = () => {
     }))
   })
 
-  const dispatch = useCallback(action => {
+  const dispatch = useCallback((action, undoable = true) => {
     setState(currentState => {
       const [nextState, patches, invPatches] = patchGeneratingGiftReducer(currentState, action)
-      console.log({ patches, invPatches })
       send(patches)
+      if (undoable) {
+        undoStack.current.push(invPatches)
+      }
       return nextState
     })
   }, [send])
@@ -72,6 +75,13 @@ export const App: React.FC = () => {
     }
   }
 
+  const handleUndo = () => {
+    if (!undoStack.current.length) return
+
+    const patches = undoStack.current.pop()
+    dispatch({ type: "APPLY_PATCHES", payload: { patches } }, false)
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -85,6 +95,7 @@ export const App: React.FC = () => {
               <button onClick={ handleAdd } >Add</button>
               <button onClick={ handleBook } >Add Book</button>
               <button onClick={ handleReset } >Reset</button>
+              <button onClick={ handleUndo } disabled={ !undoStack.current.length } >Undo</button>
             </aside>
             <ul>
               { Object.values(gifts as IGifts).map((gift: IGift) => (
