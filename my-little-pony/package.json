@@ -10,7 +10,7 @@
     "@types/uuid": "^3.4.6",
     "esm": "^3.2.25",
     "https-proxy-agent": "^3.0.1",
-    "immer": "^4.0.2",
+    "immer": "^8.0.1",
     "make-fetch-happen": "^6.0.1",
     "npm": "^6.12.1",
     "prettier": "^1.18.2",
